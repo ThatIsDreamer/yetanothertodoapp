@@ -6,9 +6,9 @@
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
     <p>
-        {{ form.username.label }}<br>
-        {{ form.username(class="form-control") }}<br>
-        {% for error in form.username.errors %}
+        {{ form.email.label }}<br>
+        {{ form.email(class="form-control") }}<br>
+        {% for error in form.email.errors %}
         <div class="alert alert-danger" role="alert">
             {{ error }}
         </div>
@@ -23,16 +23,13 @@
         </div>
         {% endfor %}
     </p>
-    <p>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
+    </p>
+        <p>
+        {% if message %}
             <div class="alert alert-danger">
                 {{ message }}
             </div>
-            {% endfor %}
         {% endif %}
-        {% endwith %}
     </p>
     <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
     <div class="flex d-flex">
