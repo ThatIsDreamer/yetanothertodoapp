@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, session, redirect, flash
-from loginform import LoginForm, RegForm
+from flask import Flask, render_template, request, session, redirect, flash, abort
+from loginform import LoginForm, RegForm, CreateTaskForm
 from data import db_session
 from data.users import User
+from data.tasks import Task
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 from werkzeug.security import check_password_hash
@@ -67,10 +68,40 @@ def index():
     return redirect("/main")
 
 
+@app.route("/addtask", methods=['GET', 'POST'])
+@login_required
+def create_task():
+    form = CreateTaskForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        task = Task()
+        task.task_name = form.title.data
+        task.status = False
+        current_user.tasks.append(task)
+        db_sess.merge(current_user)
+        db_sess.commit()
+        print(current_user.tasks)
+        return redirect('/')
+    return render_template('createtask.html', title='Добавить задачу', form=form)
+
+
 @app.route("/main")
 @login_required
 def main():
-    return f'{current_user.id}'
+    return render_template('main.html', title="TO-DO")
+
+
+@app.route("/delete/<int:id>")
+@login_required
+def deletetask(id):
+    db_sess = db_session.create_session()
+    task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
+    if task:
+        db_sess.delete(task)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect("/")
 
 if __name__ == '__main__':
     db_session.global_init("db/users.sqlite")

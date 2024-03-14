@@ -14,3 +14,7 @@ class RegForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired()])
     name = StringField("Имя", validators=[DataRequired()])
     submit = SubmitField('Зарегистрироваться')
+
+class CreateTaskForm(FlaskForm):
+    title = StringField("Задача", validators=[DataRequired()])
+    submit = SubmitField('Добавить задачу')
