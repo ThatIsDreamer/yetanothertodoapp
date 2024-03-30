@@ -5,17 +5,17 @@ from data.users import User
 from data.tasks import Task
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
-from werkzeug.security import check_password_hash
-from werkzeug.security import generate_password_hash
-import datetime
-import string
-import random
+from datetime import datetime, timedelta, date
+from blueprint import tasks_api
+
+
 
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'ilovecats'
-app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=365)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -77,6 +77,7 @@ def create_task():
         task = Task()
         task.task_name = form.title.data
         task.status = False
+        task.date = date.today()
         current_user.tasks.append(task)
         db_sess.merge(current_user)
         db_sess.commit()
@@ -87,8 +88,34 @@ def create_task():
 
 @app.route("/main")
 @login_required
-def main():
-    return render_template('main.html', title="TO-DO")
+def redirecttomain():
+    now = datetime.now()
+    return redirect(f"main/{now.strftime('%D').replace('/', '-')}")
+
+@app.route("/main/<date>")
+@login_required
+def main(date):
+    db_sess = db_session.create_session()
+
+    date = datetime.strptime(date, '%m-%d-%y')
+
+    tasks = db_sess.query(Task).filter(Task.user == current_user, Task.date==date)
+
+    now = datetime.now()
+
+    weekday = now.weekday()
+
+    start_of_week = now - timedelta(days=weekday)
+
+    end_of_week = start_of_week + timedelta(days=6)
+
+    current_week_dates = [(start_of_week + timedelta(days=i)).date() for i in range(7)]
+
+    if date != now:
+        return render_template('main.html', title="TO-DO", tasks=tasks, current_week_dates=current_week_dates, now=date, actual=now)
+    else:
+        return render_template('main.html', title="TO-DO", tasks=tasks, current_week_dates=current_week_dates, now=now, actual=now)
+
 
 
 @app.route("/delete/<int:id>")
