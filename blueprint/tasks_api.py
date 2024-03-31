@@ -1,16 +1,22 @@
-import flask
-from flask import Blueprint, request, jsonify
+from flask import Flask
+from flask_restful import Resource, Api
 from data import db_session
 from data.tasks import Task
 
-blueprint = flask.Blueprint(
-    'task_api',
-    __name__,
-    template_folder='templates'
-)
+app = Flask(__name__)
+api = Api(app)
 
-@blueprint.route('/toggle/<id>', methods=['POST'])
-def toggle(id):
-    db_sess = db_session.create_session()
-    data = request.get_json()
-    print(data)
+class TaskApi(Resource):
+    def post(self, id):
+        # URL parameters are received as function arguments
+        db_sess = db_session.create_session()
+        task = db_sess.query(Task).filter(Task.id == id).first()
+        if task:
+            task.status = not task.status
+            db_sess.commit()
+
+        return {
+            "status": "okie-dokie"
+        }, 200
+
+

@@ -4,7 +4,8 @@ from data import db_session
 from data.users import User
 from data.tasks import Task
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-
+from flask_restful import Resource, Api
+from blueprint.tasks_api import TaskApi
 from datetime import datetime, timedelta, date
 from blueprint import tasks_api
 
@@ -12,6 +13,9 @@ from blueprint import tasks_api
 
 
 app = Flask(__name__)
+api = Api(app)
+api.add_resource(TaskApi, '/api/toggle/<id>')
+
 
 app.config['SECRET_KEY'] = 'ilovecats'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
@@ -60,7 +64,11 @@ def reg():
     else:
         return render_template('reg.html', form=form)
 
-
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
 
 @app.route("/")
 @login_required
@@ -68,21 +76,21 @@ def index():
     return redirect("/main")
 
 
-@app.route("/addtask", methods=['GET', 'POST'])
+@app.route("/addtask/<seldate>", methods=['GET', 'POST'])
 @login_required
-def create_task():
+def create_task(seldate):
     form = CreateTaskForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         task = Task()
         task.task_name = form.title.data
         task.status = False
-        task.date = date.today()
+        task.date = datetime.strptime(seldate, '%m-%d-%y')
         current_user.tasks.append(task)
         db_sess.merge(current_user)
         db_sess.commit()
         print(current_user.tasks)
-        return redirect('/')
+        return redirect(f'/main/{seldate}')
     return render_template('createtask.html', title='Добавить задачу', form=form)
 
 
@@ -118,9 +126,9 @@ def main(date):
 
 
 
-@app.route("/delete/<int:id>")
+@app.route("/delete/<int:id>/<redirectto>")
 @login_required
-def deletetask(id):
+def deletetask(id, redirectto):
     db_sess = db_session.create_session()
     task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
     if task:
@@ -128,7 +136,7 @@ def deletetask(id):
         db_sess.commit()
     else:
         abort(404)
-    return redirect("/")
+    return redirect(f"/main/{redirectto}")
 
 if __name__ == '__main__':
     db_session.global_init("db/users.sqlite")
