@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="mt-5">Добавить задачу</h1>
+<h1 class="mt-5">{{ title }}</h1>
+<script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+<script>
+     EmojiMart.init({ data: EmojiMart.Data });
+</script>
 <form action="" method="post" novalidate>
-
     {{ form.hidden_tag() }}
     <p>
         {{ form.title.label }}<br>
@@ -22,6 +25,50 @@
             </div>
         {% endif %}
     </p>
+
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" id="selct" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Выбери тэг
+      </button>
+      <ul class="dropdown-menu">
+          {% for value, label in form.tag.choices %}
+            <li> <a class="dropdown-item" id="option" href="#" data-value="{{value}}"><em-emoji shortcodes="{{label[1]}}"></em-emoji> {{label[0]}}</a></li>
+          {% endfor %}
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="/createtag">Добавить тэг</a></li>
+      </ul>
+    </div>
+
+
+    {{ form.tag(class="d-none") }}
+    <p></p>
+    <p></p>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all dropdown items
+        let dropdownItems = document.querySelectorAll('#option');
+        let selected = document.querySelector('#selct')
+        console.log(dropdownItems)
+        // Loop through dropdown items and add click event listeners
+        dropdownItems.forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                selected.innerHTML = item.innerHTML
+                var selectedValue = this.getAttribute('data-value'); // Get the data-value attribute of the clicked item
+                var selectedText = this.textContent; // Get the text content of the clicked item
+
+                // Update the hidden input field's value
+                var hiddenInput = document.getElementById('{{ form.tag.id }}');
+                hiddenInput.value = selectedValue;
+
+                // Update the dropdown button text
+                var dropdownButton = document.getElementById('dropdownMenuButton');
+                dropdownButton.textContent = selectedText;
+            });
+        });
+    });
+    </script>
+
+
     <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
 </form>
 {% endblock %}

@@ -70,10 +70,18 @@
         .slider.round:before {
           border-radius: 50%;
         }
+        .content-fit {
+            width: auto; /* Ensure width is auto to only take up necessary space */
+            min-width: max-content; /* Ensures the div does not shrink below its content width */
+        }
+
     </style>
 </head>
 <body>
-
+<script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+<script>
+     EmojiMart.init({ data: EmojiMart.Data });
+</script>
 <header>
   <nav class="navbar navbar-expand-lg bg-dark-subtle">
     <div class="container-fluid">
@@ -108,15 +116,18 @@
   </nav>
 </header>
 
-<main>
+<main class="d-flex justify-content-center align-items-center flex-column">
+    {%if tasks%}
     {% for task in tasks %}
-        <div class="card my-5 " style="margin-right: 240px; margin-left: 240px;">
-            <div class="card-body d-flex flex-column">
-                <div class="d-flex align-items-center">
-                    {{ task.task_name }}
-
-                    <label class="ms-auto switch">
-                      <input onclick="
+    <div class="card my-5 border-primary" style=" min-width: 550px;">
+        <div class="card-body d-flex flex-column">
+            <div class="d-flex align-items-center">
+                {{ task.task_name }}
+                {% if task.tag %}
+                    <div class="ms-3 ps-2 pe-2 border border-primary d-flex flex-row flex-nowrap rounded-pill justify-content-center align-items-center"><em-emoji class="me-1" set="apple" shortcodes="{{ task.tag.emoji }}"></em-emoji> {{ task.tag.tag_name }}</div>
+                {% endif %}
+                <label class="ms-auto switch">
+                  <input onclick="
                         const url = `http://127.0.0.1:5000/api/toggle/{{ task.id }}`;
 
                         fetch(url, {
@@ -129,23 +140,28 @@
                         .then(response => response.json())
                         .then(data =>   console.log('yeah'))
                         .catch(error => console.error('Error:', error));" type="checkbox" {% if task.status %}checked{% endif %}>
-                      <span class="slider round"></span>
-                    </label>
-                </div>
-                <div>
-                    <div class="dropdown">
-                      <button class="btn btn-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Изменить
-                      </button>
-                      <ul class="dropdown-menu" style="">
-                        <li><a class="dropdown-item" href="">Изменить</a></li>
-                        <li><a class="dropdown-item" href="/delete/{{ task.id }}/{{ task.date.strftime('%m-%d-%y') }}">Удалить</a></li>
-                      </ul>
-                    </div>
-                </div>
+                  <span class="slider round"></span>
+                </label>
             </div>
+            <div>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Изменить
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/edit/{{ task.id }}">Изменить</a></li>
+                    <li><a class="dropdown-item" href="/delete/{{ task.id }}/{{ task.date.strftime('%m-%d-%y') }}">Удалить</a></li>
+                  </ul>
+                </div>
+
+            </div>
+
         </div>
+    </div>
     {% endfor %}
+    {% else %}
+    <p class="mt-5 fs-3 text-muted">У тебя нет задач на сегодня <em-emoji class="me-1" set="apple" shortcodes=":tada:"></em-emoji></p>
+    {% endif %}
       <button class="btn btn-primary position-fixed" style="right: 20px; bottom: 20px;" onclick="location.href='/addtask/{{ now.date().strftime('%m-%d-%y') }}'">Добавить задачу</button>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script></body>

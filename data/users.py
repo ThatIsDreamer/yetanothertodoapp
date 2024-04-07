@@ -17,6 +17,7 @@ class User(SqlAlchemyBase, UserMixin):
 
     tasks = orm.relationship('Task', back_populates='user')
 
+    tags = orm.relationship("Tags", back_populates='user')
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
 

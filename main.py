@@ -1,14 +1,14 @@
 from flask import Flask, render_template, request, session, redirect, flash, abort
-from loginform import LoginForm, RegForm, CreateTaskForm
+from loginform import LoginForm, RegForm, CreateTaskForm, CreateTag
 from data import db_session
 from data.users import User
 from data.tasks import Task
+from data.tags import Tags
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Resource, Api
 from blueprint.tasks_api import TaskApi
 from datetime import datetime, timedelta, date
-from blueprint import tasks_api
-
+from sqlalchemy.orm import make_transient
 
 
 
@@ -80,18 +80,48 @@ def index():
 @login_required
 def create_task(seldate):
     form = CreateTaskForm()
+    db_sess = db_session.create_session()
+    user_tags = db_sess.query(Tags).filter(Tags.user == current_user).all()
+    print(user_tags)
+    form.tag.choices = [(tag.id, [tag.tag_name, tag.emoji]) for tag in user_tags]
+    form.tag.choices.insert(0, (None, ["Нет", ":X:"]))
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
         task = Task()
         task.task_name = form.title.data
         task.status = False
         task.date = datetime.strptime(seldate, '%m-%d-%y')
-        current_user.tasks.append(task)
-        db_sess.merge(current_user)
+
+        if form.tag.data:
+            tag = db_sess.query(Tags).filter(Tags.id == form.tag.data).first()
+            task.tag_id = tag.id if tag else None
+        else:
+            task.tag = None
+
+        db_sess.add(task)
+
+        task.user_id = current_user.id
+
         db_sess.commit()
-        print(current_user.tasks)
+
         return redirect(f'/main/{seldate}')
     return render_template('createtask.html', title='Добавить задачу', form=form)
+
+
+@app.route("/createtag", methods=['GET', 'POST'])
+@login_required
+def createTag():
+    form = CreateTag()
+    if form.validate_on_submit():
+        print(form.emojiastext.data, form.title.data)
+        db_sess = db_session.create_session()
+        tag = Tags()
+        tag.emoji = form.emojiastext.data
+        tag.tag_name = form.title.data
+        current_user.tags.append(tag)
+        db_sess.merge(current_user)
+        db_sess.commit()
+        return redirect('/main')
+    return render_template('createtag.html', title='Добавить тэг', form=form)
 
 
 @app.route("/main")
@@ -104,6 +134,11 @@ def redirecttomain():
 @login_required
 def main(date):
     db_sess = db_session.create_session()
+
+
+    if current_user.is_authenticated:
+        make_transient(current_user)
+        db_sess.merge(current_user)
 
     date = datetime.strptime(date, '%m-%d-%y')
 
@@ -120,11 +155,36 @@ def main(date):
     current_week_dates = [(start_of_week + timedelta(days=i)).date() for i in range(7)]
 
     if date != now:
-        return render_template('main.html', title="TO-DO", tasks=tasks, current_week_dates=current_week_dates, now=date, actual=now)
+        return render_template('main.html', title="TO-DO", tasks=list(tasks), current_week_dates=current_week_dates, now=date, actual=now)
     else:
-        return render_template('main.html', title="TO-DO", tasks=tasks, current_week_dates=current_week_dates, now=now, actual=now)
+        return render_template('main.html', title="TO-DO", tasks=list(tasks), current_week_dates=current_week_dates, now=now, actual=now)
 
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit(id: int):
+    db_sess = db_session.create_session()
+    form = CreateTaskForm()
+    user_tags = db_sess.query(Tags).filter(Tags.user == current_user).all()
+    print(user_tags)
+    form.tag.choices = [(tag.id, [tag.tag_name, tag.emoji]) for tag in user_tags]
+    form.tag.choices.insert(0, (None, ["Нет", ":X:"]))
 
+    task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
+    if task:
+        form.title.data = task.task_name
+    else:
+        abort(404)
+    if form.validate_on_submit():
+        print("what")
+        db_sess = db_session.create_session()
+        task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
+        if task:
+            task.task_name = form.title.data
+            db_sess.commit()
+            return redirect('/main')
+        else:
+            abort(404)
+    return render_template('createtask.html', title='Реадктировать задачу', form=form)
 
 @app.route("/delete/<int:id>/<redirectto>")
 @login_required

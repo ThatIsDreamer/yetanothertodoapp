@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mt-5">{{ title }}</h1>
+<script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+
+<script>
+
+     EmojiMart.init({ data: EmojiMart.Data });
+</script>
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.title.label }}<br>
+        <div class="input-group mb-3">
+            <button class="btn btn-outline-secondary" type="button" id="button-addon1">Выбери эмодзи</button>
+            {{ form.title(class="form-control") }}
+        </div>
+        <br>
+
+    <p>
+        {{ form.emojiastext(class="d-none", id="emojiinp") }}
+    </p>
+        {% for error in form.title.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+
+        <p>
+        {% if message %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endif %}
+    </p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+</form>
+<script>
+         emojipreview = document.querySelector("#button-addon1")
+         emojiinput = document.querySelector("#emojiinp")
+        const pickerOptions = {
+              onEmojiSelect: handleEmojiSelection,
+              locale: 'ru'
+            };
+     function handleEmojiSelection(emoji) {
+          console.log('Selected emoji:', emoji);
+          emojiinput.value = emoji["shortcodes"]
+          emojipreview.innerHTML = `<em-emoji shortcodes="${emoji["shortcodes"]}"></em-emoji>`
+
+        }
+        const picker = new EmojiMart.Picker(pickerOptions)
+       form = document.querySelector('form')
+     emojipreview.addEventListener('click', function(){
+            form.appendChild(picker)
+
+      })
+</script>
+
+{% endblock %}
