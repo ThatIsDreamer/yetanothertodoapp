@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика профиля{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Статистика профиля</h1>
+
+    <div class="mb-5">
+        <h2 class="mb-3">Статистика за всё время</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-header">Всего задач</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ total_tasks }}</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-header">Задач выполнено</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ completed_tasks }}</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning mb-3">
+                    <div class="card-header">Задач осталось</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ pending_tasks }}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="mb-3">Статистика за неделю</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-white bg-info mb-3">
+                    <div class="card-header">Выполнено за неделю</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ completed_this_week }}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="/" class="btn btn-secondary mt-3">Вернуться на главную</a>
+</div>
+{% endblock %}

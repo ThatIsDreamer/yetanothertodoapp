@@ -169,22 +169,33 @@ def edit(id: int):
     form.tag.choices = [(tag.id, [tag.tag_name, tag.emoji]) for tag in user_tags]
     form.tag.choices.insert(0, (None, ["Нет", ":X:"]))
 
-    task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
-    if task:
-        form.title.data = task.task_name
-    else:
-        abort(404)
-    if form.validate_on_submit():
-        print("what")
+    if request.method == 'GET':
         db_sess = db_session.create_session()
-        task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
+        task: Task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
+        if task:
+            form.title.data = task.task_name
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        task: Task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
         if task:
             task.task_name = form.title.data
+            if form.tag.data:
+                tag = db_sess.query(Tags).filter(Tags.id == form.tag.data).first()
+                task.tag_id = tag.id if tag else None
+            else:
+                task.tag = None
+
             db_sess.commit()
-            return redirect('/main')
+            return redirect('/')
         else:
             abort(404)
     return render_template('createtask.html', title='Реадктировать задачу', form=form)
+
+
+
+    
 
 @app.route("/delete/<int:id>/<redirectto>")
 @login_required
@@ -197,6 +208,34 @@ def deletetask(id, redirectto):
     else:
         abort(404)
     return redirect(f"/main/{redirectto}")
+
+@app.route("/stats")
+@login_required
+def profile_stats():
+    db_sess = db_session.create_session()
+
+    total_tasks = db_sess.query(Task).filter(Task.user == current_user).count()
+
+    completed_tasks = db_sess.query(Task).filter(Task.user == current_user, Task.status == True).count()
+
+    pending_tasks = total_tasks - completed_tasks
+
+    now = datetime.now()
+    start_of_week = now - timedelta(days=now.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    completed_this_week = db_sess.query(Task).filter(
+        Task.user == current_user,
+        Task.status == True,
+        Task.date >= start_of_week,
+        Task.date <= end_of_week
+    ).count()
+
+    return render_template('stats.html',
+                           total_tasks=total_tasks,
+                           completed_tasks=completed_tasks,
+                           pending_tasks=pending_tasks,
+                           completed_this_week=completed_this_week)
+
 
 if __name__ == '__main__':
     db_session.global_init("db/users.sqlite")
