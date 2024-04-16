@@ -192,7 +192,7 @@ def edit(id: int):
             return redirect('/')
         else:
             abort(404)
-    return render_template('createtask.html', title='Реадктировать задачу', form=form)
+    return render_template('createtask.html', title='Редактировать задачу', form=form)
 
 
 
