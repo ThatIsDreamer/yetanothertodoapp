@@ -11,4 +11,5 @@
 - **Функция "Фокусировка":** Таймеры типа "Помодоро" или режимы концентрации, которые помогают улучшить продуктивность.
 
 [ПЗ](https://hammerhead-celery-f0f.notion.site/TO-DO-503117d6496a4d30aaa8ebfa1364d9b0?pvs=4)
+
 [Призентация](https://docs.google.com/presentation/d/1J1gC9hbY8fFpX0DBi6JAXX9z6eRiXTDL/edit?usp=sharing&ouid=104578097460243845156&rtpof=true&sd=true)
