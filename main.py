@@ -154,6 +154,7 @@ def main(date):
 
     current_week_dates = [(start_of_week + timedelta(days=i)).date() for i in range(7)]
 
+
     if date != now:
         return render_template('main.html', title="TO-DO", tasks=list(tasks), current_week_dates=current_week_dates, now=date, actual=now)
     else:
@@ -208,6 +209,26 @@ def deletetask(id, redirectto):
     else:
         abort(404)
     return redirect(f"/main/{redirectto}")
+
+@app.route("/deletetag/<int:id>/")
+@login_required
+def deletetag(id):
+    db_sess = db_session.create_session()
+    tag = db_sess.query(Tags).filter(Tags.id == id, Tags.user == current_user).first()
+    if tag:
+        db_sess.delete(tag)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect(f"/edittags")
+
+@app.route("/edittags")
+@login_required
+def edittags():
+    db_sess = db_session.create_session()
+    user_tags = db_sess.query(Tags).filter(Tags.user == current_user).all()
+    return render_template("edittags.html", tags=user_tags, tag_count=len(user_tags))
+
 
 @app.route("/stats")
 @login_required

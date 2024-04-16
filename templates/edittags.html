@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+<script>
+     EmojiMart.init({ data: EmojiMart.Data });
+</script>
+<h1 class="mt-5">Твои тэги</h1>
+{% if tag_count > 0 %}
+     {% for tag in tags %}
+          <div class="btn-group mb-3" role="group" aria-label="Basic mixed styles example">
+               <button type="button" class="btn btn-primary"> <em-emoji class="me-1" set="apple" shortcodes="{{ tag.emoji }}"></em-emoji> {{tag.tag_name}}</button>
+               <a type="button" href="/deletetag/{{ tag.id }}" class="btn btn-danger">X</a>
+          </div>
+          <br>
+     {% endfor %}
+{% else %}
+<p class="mt-2">У Тебя нет тэгов... </p>
+{% endif %}
+<a class="btn btn-primary" href="/createtag">Добавить тэг</a>
+{% endblock %}
+

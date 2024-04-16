@@ -1,0 +1,24 @@
+{
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    { "src": "/api/toggle/(.*)", "dest": "main.py" },
+    { "src": "/login", "methods": ["GET", "POST"], "dest": "main.py" },
+    { "src": "/reg", "methods": ["GET", "POST"], "dest": "main.py" },
+    { "src": "/logout", "methods": ["GET"], "dest": "main.py" },
+    { "src": "/", "methods": ["GET"], "dest": "main.py" },
+    { "src": "/addtask/(.*)", "methods": ["GET", "POST"], "dest": "main.py" },
+    { "src": "/createtag", "methods": ["GET", "POST"], "dest": "main.py" },
+    { "src": "/main", "methods": ["GET"], "dest": "main.py" },
+    { "src": "/main/(.*)", "methods": ["GET"], "dest": "main.py" },
+    { "src": "/edit/(.*)", "methods": ["GET", "POST"], "dest": "main.py" },
+    { "src": "/delete/(.*)/(.*)", "methods": ["GET"], "dest": "main.py" },
+    { "src": "/deletetag/(.*)", "methods": ["GET"], "dest": "main.py" },
+    { "src": "/edittags", "methods": ["GET"], "dest": "main.py" },
+    { "src": "/stats", "methods": ["GET"], "dest": "main.py" }
+  ]
+}
