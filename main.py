@@ -25,6 +25,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+db_session.global_init("db/users.sqlite")
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
@@ -259,5 +261,5 @@ def profile_stats():
 
 
 if __name__ == '__main__':
-    db_session.global_init("db/users.sqlite")
+    #db_session.global_init("db/users.sqlite")
     app.run(port=5000, host='127.0.0.1')
