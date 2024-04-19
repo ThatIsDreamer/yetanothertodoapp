@@ -32,7 +32,7 @@
       </button>
       <ul class="dropdown-menu">
           {% for value, label in form.tag.choices %}
-            <li> <a class="dropdown-item" id="option" href="#" data-value="{{value}}"><em-emoji shortcodes="{{label[1]}}"></em-emoji> {{label[0]}}</a></li>
+            <li> <a class="dropdown-item" id="option" href="#" data-value="{{value}}"><em-emoji  set=apple shortcodes="{{label[1]}}"></em-emoji> {{label[0]}}</a></li>
           {% endfor %}
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="/createtag">Добавить тэг</a></li>

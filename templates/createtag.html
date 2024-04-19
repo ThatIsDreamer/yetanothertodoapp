@@ -42,12 +42,12 @@
          emojiinput = document.querySelector("#emojiinp")
         const pickerOptions = {
               onEmojiSelect: handleEmojiSelection,
-              locale: 'ru'
+              locale: 'ru',
             };
      function handleEmojiSelection(emoji) {
           console.log('Selected emoji:', emoji);
           emojiinput.value = emoji["shortcodes"]
-          emojipreview.innerHTML = `<em-emoji shortcodes="${emoji["shortcodes"]}"></em-emoji>`
+          emojipreview.innerHTML = `<em-emoji set="apple" shortcodes="${emoji["shortcodes"]}"></em-emoji>`
 
         }
         const picker = new EmojiMart.Picker(pickerOptions)
